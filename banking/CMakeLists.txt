@@ -35,9 +35,12 @@ add_test(NAME check COMMAND check)
 
 endif()
 
+# Add this near the top of your CMakeLists.txt
 option(ENABLE_COVERAGE "Enable coverage reporting" OFF)
 
 if(ENABLE_COVERAGE)
+    message(STATUS "Enabling code coverage instrumentation")
     add_compile_options(-fprofile-arcs -ftest-coverage)
     add_link_options(--coverage)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
 endif()
