@@ -34,7 +34,12 @@ TEST(TransactionTests, SuccessfulTransaction) {
     NiceMock<MockAccount> acc2(2, initial2);
     MockTransaction transaction;
     
- 
+    // Sequence based on actual implementation:
+    // 1. Lock both accounts
+    // 2. Debit from acc1 first (ChangeBalance -sum-fee)
+    // 3. Then credit to acc2 (ChangeBalance +sum)
+    // 4. Unlock both accounts
+    // 5. Save to database
     
     testing::InSequence seq;
     
@@ -66,13 +71,14 @@ TEST(TransactionTests, FailedTransactionDueToInsufficientFunds) {
     EXPECT_CALL(acc1, Lock()).Times(1);
     EXPECT_CALL(acc2, Lock()).Times(1);
     
+    // First debit from acc1 (will fail)
     EXPECT_CALL(acc1, ChangeBalance(-(sum + transaction.fee())))
-        .WillOnce(Throw(std::runtime_error("Insufficient funds")));
+        .WillOnce(testing::Throw(std::runtime_error("Insufficient funds")));
     
     EXPECT_CALL(acc1, Unlock()).Times(1);
     EXPECT_CALL(acc2, Unlock()).Times(1);
     
-    
+    // Still saves to database even if failed
     EXPECT_CALL(transaction, SaveToDataBase(Ref(acc1), Ref(acc2), sum)).Times(1);
 
     EXPECT_FALSE(transaction.Make(acc1, acc2, sum));
@@ -87,7 +93,7 @@ TEST(TransactionTests, DatabaseOutputFormat) {
     NiceMock<MockAccount> acc1(1, initial1);
     NiceMock<MockAccount> acc2(2, initial2);
     
-
+    // Set default behaviors
     ON_CALL(acc1, GetBalance())
         .WillByDefault(Return(initial1 - sum - transaction.fee()));
     ON_CALL(acc2, GetBalance())
@@ -97,7 +103,7 @@ TEST(TransactionTests, DatabaseOutputFormat) {
     transaction.Make(acc1, acc2, sum);
     std::string output = testing::internal::GetCapturedStdout();
     
-
+    // Verify output contains key information
     EXPECT_THAT(output, HasSubstr("1 send to 2 $500"));
     EXPECT_THAT(output, HasSubstr("Balance 1 is 499")); 
     EXPECT_THAT(output, HasSubstr("Balance 2 is 2500"));
