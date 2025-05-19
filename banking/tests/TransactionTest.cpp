@@ -34,10 +34,10 @@ TEST(TransactionTests, SuccessfulTransaction) {
     NiceMock<MockAccount> acc2(2, initial2);
     MockTransaction transaction;
     
-    // Sequence based on actual implementation:
+    // Updated sequence to match actual implementation:
     // 1. Lock both accounts
-    // 2. Debit from acc1 first (ChangeBalance -sum-fee)
-    // 3. Then credit to acc2 (ChangeBalance +sum)
+    // 2. Credit to acc2 first (ChangeBalance +sum)
+    // 3. Then debit from acc1 (ChangeBalance -sum-fee)
     // 4. Unlock both accounts
     // 5. Save to database
     
@@ -46,8 +46,8 @@ TEST(TransactionTests, SuccessfulTransaction) {
     EXPECT_CALL(acc1, Lock()).Times(1);
     EXPECT_CALL(acc2, Lock()).Times(1);
     
-    EXPECT_CALL(acc1, ChangeBalance(-(sum + transaction.fee()))).Times(1);
     EXPECT_CALL(acc2, ChangeBalance(sum)).Times(1);
+    EXPECT_CALL(acc1, ChangeBalance(-(sum + transaction.fee()))).Times(1);
     
     EXPECT_CALL(acc1, Unlock()).Times(1);
     EXPECT_CALL(acc2, Unlock()).Times(1);
@@ -71,14 +71,20 @@ TEST(TransactionTests, FailedTransactionDueToInsufficientFunds) {
     EXPECT_CALL(acc1, Lock()).Times(1);
     EXPECT_CALL(acc2, Lock()).Times(1);
     
-    // First debit from acc1 (will fail)
+    // First credit to acc2
+    EXPECT_CALL(acc2, ChangeBalance(sum)).Times(1);
+    
+    // Then debit from acc1 (will fail)
     EXPECT_CALL(acc1, ChangeBalance(-(sum + transaction.fee())))
         .WillOnce(testing::Throw(std::runtime_error("Insufficient funds")));
+    
+    // Rollback the credit
+    EXPECT_CALL(acc2, ChangeBalance(-sum)).Times(1);
     
     EXPECT_CALL(acc1, Unlock()).Times(1);
     EXPECT_CALL(acc2, Unlock()).Times(1);
     
-    // Still saves to database even if failed
+    // Still saves to database
     EXPECT_CALL(transaction, SaveToDataBase(Ref(acc1), Ref(acc2), sum)).Times(1);
 
     EXPECT_FALSE(transaction.Make(acc1, acc2, sum));
