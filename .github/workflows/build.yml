@@ -32,9 +32,8 @@ jobs:
     - name: Generate coverage
       run: |
         cd banking/build
-        lcov --capture --directory . --output-file coverage.info
-        lcov --remove coverage.info '/usr/*' --output-file coverage.info
-        lcov --list coverage.info
+          lcov --ignore-errors mismatch --ignore-errors gcov,gcov  --capture --directory . -o coverage.info || lcov --ignore-errors gcov --capture --directory . -o coverage.info 
+          lcov --extract coverage.info  "*/banking/*"  -o result_coverage.info
         
     - name: Upload to Coveralls
       uses: coverallsapp/github-action@v2
