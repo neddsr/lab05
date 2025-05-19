@@ -36,7 +36,8 @@ add_test(NAME check COMMAND check)
 endif()
 
 option(ENABLE_COVERAGE "Enable coverage reporting" OFF)
+
 if(ENABLE_COVERAGE)
-add_compile_options(--coverage -fprofile-arcs -ftest-coverage)
-add_link_options(--coverage)
+    add_compile_options(-fprofile-arcs -ftest-coverage)
+    add_link_options(--coverage)
 endif()
