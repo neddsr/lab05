@@ -1,0 +1,44 @@
+name: Banking CI
+
+on: [push, pull_request]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+        
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential cmake lcov
+        
+    - name: Configure and build
+      run: |
+        mkdir build
+        cd build
+        cmake -DBUILD_TESTS=ON -DENABLE_COVERAGE=ON ..
+        make
+        
+    - name: Run tests
+      run: |
+        cd build
+        ctest --output-on-failure
+        
+    - name: Generate coverage
+      run: |
+        cd build
+        lcov --capture --directory . --output-file coverage.info
+        lcov --remove coverage.info '/usr/*' --output-file coverage.info
+        lcov --list coverage.info
+        
+    - name: Upload to Coveralls
+      uses: coverallsapp/github-action@v2
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        path-to-lcov: build/coverage.info
+        flag-name: linux-gcc
+        parallel: true
