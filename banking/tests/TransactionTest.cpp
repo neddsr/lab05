@@ -27,12 +27,10 @@ TEST(TransactionTests, SuccessfulTransaction) {
     NiceMock<MockAccount> acc1(1, initial1);
     NiceMock<MockAccount> acc2(2, initial2);
     Transaction transaction;
-    
-    // Set up default behaviors
+
     ON_CALL(acc1, GetBalance()).WillByDefault(Return(initial1));
     ON_CALL(acc2, GetBalance()).WillByDefault(Return(initial2));
-    
-    // Minimal expectations - just verify locking/unlocking happens
+
     EXPECT_CALL(acc1, Lock()).Times(1);
     EXPECT_CALL(acc2, Lock()).Times(1);
     EXPECT_CALL(acc1, Unlock()).Times(1);
@@ -54,11 +52,9 @@ TEST(TransactionTests, FailedTransactionDueToInsufficientFunds) {
     NiceMock<MockAccount> acc1(1, initial1);
     NiceMock<MockAccount> acc2(2, initial2);
     Transaction transaction;
-    
-    // Set up default behaviors
+
     ON_CALL(acc1, GetBalance()).WillByDefault(Return(initial1));
-    
-    // Minimal expectations
+
     EXPECT_CALL(acc1, Lock()).Times(1);
     EXPECT_CALL(acc2, Lock()).Times(1);
     EXPECT_CALL(acc1, Unlock()).Times(1);
@@ -81,7 +77,6 @@ TEST(TransactionTests, DatabaseOutputFormat) {
     NiceMock<MockAccount> acc1(1, initial1);
     NiceMock<MockAccount> acc2(2, initial2);
     
-    // Set default behaviors with expected final balances
     ON_CALL(acc1, GetBalance())
         .WillByDefault(Return(initial1 - sum - transaction.fee()));
     ON_CALL(acc2, GetBalance())
