@@ -18,7 +18,7 @@ jobs:
         
     - name: Configure and build
       run: |
-        cd banking  # Enter the banking directory where CMakeLists.txt exists
+        cd banking  
         mkdir build
         cd build
         cmake .. -DBUILD_TESTS=ON -DENABLE_COVERAGE=ON
@@ -40,5 +40,3 @@ jobs:
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         path-to-lcov: banking/build/coverage.info
-        flag-name: linux-gcc
-        parallel: true
