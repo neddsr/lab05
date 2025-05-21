@@ -32,9 +32,9 @@ jobs:
     - name: Generate coverage
       run: |
         cd banking/build
-          lcov --extract coverage.info "*/banking/*" -o temp_coverage.info
-
-          lcov --remove temp_coverage.info "*/banking/*/*" -o result_coverage.info
+        lcov --ignore-errors mismatch --ignore-errors gcov,gcov  --capture --directory . -o coverage.info || lcov --ignore-errors gcov --capture --directory . -o coverage.info 
+        lcov --extract coverage.info "*/banking/*" -o temp_coverage.info
+        lcov --remove temp_coverage.info "*/banking/*/*" -o result_coverage.info
         
     - name: Upload to Coveralls
       uses: coverallsapp/github-action@v2
