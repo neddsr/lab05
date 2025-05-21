@@ -35,7 +35,6 @@ jobs:
           lcov --extract coverage.info "*/banking/*" -o temp_coverage.info
 
           lcov --remove temp_coverage.info "*/banking/*/*" -o result_coverage.info
-          rm temp_coverage.info
         
     - name: Upload to Coveralls
       uses: coverallsapp/github-action@v2
