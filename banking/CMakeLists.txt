@@ -18,7 +18,6 @@ option(BUILD_TESTS "Build tests" ON)
 if(BUILD_TESTS)
 enable_testing()
 
-# Add Google Test as subdirectory
 add_subdirectory(third-party/gtest)
 
 file(GLOB ${PROJECT_NAME}_TEST_SOURCES tests/*.cpp)
@@ -35,7 +34,6 @@ add_test(NAME check COMMAND check)
 
 endif()
 
-# Add this near the top of your CMakeLists.txt
 option(ENABLE_COVERAGE "Enable coverage reporting" OFF)
 
 if(ENABLE_COVERAGE)
